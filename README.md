@@ -13,6 +13,10 @@ home_paper_search/
 
 每个文件是一次检索/保存的批次报告，包含论文表格与完整摘要。
 
+## 专题综述
+
+- 2026-10-25：[强化学习：从试错学习到推理智能](2026-10-25/00-reinforcement-learning-survey.md)（[PDF 全文](2026-10-25/assets/reinforcement-learning-survey.pdf)，116 页，79 条参考文献）
+
 ## 同步方式
 
 在本机 DSH 会话中说出「更新github论文库」，会自动把新增的 Markdown 文件提交并推送到本仓库。
