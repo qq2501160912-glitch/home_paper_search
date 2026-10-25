@@ -54,7 +54,7 @@ $$
 \|\mathcal{T}^{\pi}V_1-\mathcal{T}^{\pi}V_2\|_{\infty}\le\gamma\|V_1-V_2\|_{\infty}.
 $$
 
-由 Banach 不动点定理，$V^{\pi}$ 唯一，值迭代以 $\gamma^k$ 几何收敛。最优算子 $\mathcal{T}^{*}$ 把期望换成逐状态最大化，得到
+由 Banach 不动点定理，$V^{\pi}$ 唯一，值迭代的几何因子为 $\gamma$：严格地有 $\|V_k-V^{*}\|_{\infty}\le\frac{\gamma^{k}}{1-\gamma}\|V_1-V_0\|_{\infty}$，即误差以 $\gamma^k$ 衰减，但界前带 $\frac{1}{1-\gamma}$ 的放大常数（$\gamma\to1$ 时收敛很慢）。最优算子 $\mathcal{T}^{*}$ 把期望换成逐状态最大化，得到
 
 $$
 V^{*}(s)=\max_{a\in\mathcal{A}}\left[r(s,a)+\gamma\sum_{s'\in\mathcal{S}}P(s'\mid s,a)V^{*}(s')\right].
@@ -62,14 +62,22 @@ $$
 
 ### 2. 策略梯度定理
 
-令 $J(\theta)=\mathbb{E}_{\tau\sim p_\theta}\left[\sum_{t=0}^{\infty}\gamma^{t}R_{t+1}\right]$，则
+令 $J(\theta)=\mathbb{E}_{\tau\sim p_\theta}\left[\sum_{t=0}^{\infty}\gamma^{t}R_{t+1}\right]$，并记 $G_t=\sum_{k=0}^{\infty}\gamma^{k}R_{t+k+1}$ 为**从 $t$ 时刻起的折扣回报**（reward-to-go，其内部已从 $\gamma^{0}$ 起计折扣），则
 
 $$
 \nabla_{\theta}J(\theta)
 =\mathbb{E}_{\tau\sim p_{\theta}}\left[\sum_{t=0}^{\infty}\gamma^{t}\,\nabla_{\theta}\log\pi_{\theta}(A_t\mid S_t)\,G_t\right].
 $$
 
-证明只依赖两个事实：轨迹似然比 $\nabla_{\theta}p_{\theta}(\tau)=p_{\theta}(\tau)\sum_t\nabla_{\theta}\log\pi_{\theta}(A_t\mid S_t)$，以及得分函数的条件期望为零。它不要求环境可微，这是 RL 能用于黑箱系统的根本原因。
+注意这里的 $\gamma^{t}$ 不是对 $G_t$ 的二次折扣：$G_t$ 内部对 $R_{t+k+1}$ 用的是 $\gamma^{k}$，外层 $\gamma^{t}$ 对应目标函数中 $R_{t+1}$ 的权重，两者相乘恰为 $\gamma^{t+k}$。若把 $G_t$ 改写成"已含折扣前缀"的形式，则应省去外层 $\gamma^t$，两种写法等价。
+
+证明依赖三个事实，缺一不可：
+
+1. 轨迹似然比 $\nabla_{\theta}p_{\theta}(\tau)=p_{\theta}(\tau)\sum_t\nabla_{\theta}\log\pi_{\theta}(A_t\mid S_t)$；
+2. 得分函数的条件期望为零：$\mathbb{E}[\nabla_\theta\log\pi_\theta(A_t\mid S_t)\mid S_t]=0$；
+3. **因果性**：$t$ 时刻的动作不影响 $t$ 之前的奖励，因此 $\nabla_\theta\log\pi_\theta(A_t\mid S_t)$ 与 $\sum_{t'<t}\gamma^{t'}R_{t'+1}$ 的条件期望相互抵消，回报才能从"全轨迹回报"约化为 reward-to-go $G_t$。
+
+它不要求环境可微，这是 RL 能用于黑箱系统的根本原因。
 
 ### 3. KL 正则 RLHF 与 DPO
 
@@ -84,9 +92,12 @@ $$
 
 $$
 \pi^{*}(y\mid x)=\frac{1}{Z(x)}\,\pi_{\mathrm{ref}}(y\mid x)\exp\left(\frac{r(x,y)}{\beta}\right),
+\qquad Z(x)=\sum_{y}\pi_{\mathrm{ref}}(y\mid x)\exp\left(\frac{r(x,y)}{\beta}\right).
 $$
 
-反解奖励得 $r(x,y)=\beta\log\frac{\pi^{*}(y\mid x)}{\pi_{\mathrm{ref}}(y\mid x)}+\beta\log Z(x)$。把它代入 Bradley–Terry 偏好模型，配分函数 $Z(x)$ 消掉，得到 DPO 损失：
+推导要点（两个前提必须写明）：目标对每个固定 $x$ 是彼此独立的**逐点**优化问题，故可对单个 $x$ 用拉格朗日法求解（归一化约束 $\sum_y\pi=1$），得到上式；$Z(x)$ 是归一化配分函数。
+
+反解奖励得 $r(x,y)=\beta\log\frac{\pi^{*}(y\mid x)}{\pi_{\mathrm{ref}}(y\mid x)}+\beta\log Z(x)$。把它代入 Bradley–Terry 偏好模型——由于 $y_w$ 与 $y_l$ 共享**同一个** $x$，两式中的 $\beta\log Z(x)$ 恰好相同而相减抵消，这才得到 DPO 损失：
 
 $$
 \mathcal{L}_{\mathrm{DPO}}(\theta)
@@ -109,11 +120,13 @@ $$
 
 ### 4. GRPO 的组内优势
 
-GRPO 对同一问题采样 $G$ 个回答，用组内相对奖励替代 critic：
+GRPO 对同一问题采样 $G$ 个回答，用组内相对奖励替代 critic。记每个回答的奖励为 $r_i$，组内优势为
 
 $$
 \hat{A}_{i}=\frac{r_i-\operatorname{mean}(r_1,\dots,r_G)}{\operatorname{std}(r_1,\dots,r_G)}.
 $$
+
+标准差归一化有两个必须说明的性质：其一，它是**正比例缩放**，不改变组内排序，因此不改变“哪个回答更好”的判断；其二，当组内奖励全相同（全对或全错，$\operatorname{std}=0$）时会除零——此时组内优势本应全为 $0$、该组不产生梯度信号，工程实现须显式加 $\epsilon$ 或跳过该组。
 
 目标函数为
 
@@ -123,10 +136,14 @@ $$
 \frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}
 \min\left(\rho_{i,t}\hat{A}_i,\ \operatorname{clip}\left(\rho_{i,t},1-\epsilon,1+\epsilon\right)\hat{A}_i\right)
 -\beta D_{\mathrm{KL}}\left(\pi_{\theta}\,\|\,\pi_{\mathrm{ref}}\right)
-\right].
+\right],
 $$
 
-它把“价值网络”换成了“同一问题下多个回答的相对好坏”，显存开销约为 PPO-RLHF 的一半，适合数学、代码、STEM 等可验证任务。
+其中似然比为 token 级：
+$\rho_{i,t}=\pi_\theta(o_{i,t}\mid q,o_{i,<t})\big/\pi_{\theta_{\mathrm{old}}}(o_{i,t}\mid q,o_{i,<t})$。
+按 DeepSeekMath 原文，KL 项是**直接加在目标函数中**的一项，而不是先塑形进逐 token 奖励。
+
+它把“价值网络”换成了“同一问题下多个回答的相对好坏”，消去了与策略同规模的 critic（省下的显存取决于 critic 与策略的规模比，并非固定比例），适合数学、代码、STEM 等可验证任务。
 
 ---
 
@@ -137,7 +154,7 @@ $$
 | 1957 | 动态规划 / MDP | 最优性原理、Bellman 方程、值迭代/策略迭代 | 需要已知模型 |
 | 1959 | Samuel 跳棋 | 自我对弈、线性评估、rote learning | 依赖人工特征 |
 | 1988 | TD(0) | 用自举目标在线估计值函数 | 仅策略评估 |
-| 1989 | Q-learning | 离策略、直接逼近最优动作价值 | 最大化偏差；函数逼近下发散 |
+| 1989/1992 | Q-learning | 离策略、直接逼近最优动作价值（1989 博士论文提出，1992 期刊版并给出收敛性证明） | 最大化偏差；函数逼近下发散 |
 | 1992 | REINFORCE | 似然比策略梯度，无需环境模型 | 方差极大 |
 | 1992/1995 | TD-Gammon | 非线性函数逼近 + 自博弈 + TD(λ) | 难以推广到围棋 |
 | 2013/2015 | DQN | 经验回放、目标网络、端到端像素输入 | 样本效率低 |
@@ -193,7 +210,9 @@ $$
 2. **策略梯度的似然比结构**：它把“对轨迹分布求导”化为“对动作对数概率求导”，使黑箱环境下的优化成为可能；基线、优势、GAE 都是围绕方差削减展开的。
 3. **KL 正则的闭式解**：它把“奖励—策略对数比”绑定在一起，使 DPO 可以消去奖励模型；同样的结构也解释了 RLHF 中 KL 惩罚的作用。
 
-报告对上述结论给出了完整的证明或证明思路，包括：Banach 不动点定理、策略改进定理、值迭代近似界、策略梯度定理、性能差引理、TRPO 下界、PPO 裁剪梯度、DPG 定理、SAC 软策略迭代、DPO 闭式推导、GRPO 组内优势性质。所有公式均按标准数学排版，下标、上标、期望与算子均保持语义一致。
+**完整证明在 PDF 全文，不在本摘要。** PDF 给出了逐式推导，包括：贝尔曼算子的压缩性与 Banach 不动点定理及其收敛速率界（第 2 章）、策略改进定理、值迭代近似最优性界 $\frac{2\gamma}{1-\gamma}$（定理 2.x）、策略梯度定理的完整证明与基线不变性（第 5 章，式 5.8→5.11→5.12，命题 5.1）、以梯度范数平方加权的最优基线（式 5.19）、TRPO 单调改进下界与 PPO 裁剪梯度（第 5 章）、DPG 定理、SAC 软策略迭代（第 5 章）、KL 正则 RL 的闭式最优解（定理 7.1 拉格朗日推导）、DPO 损失与梯度（式 7.19–7.21）、GRPO 组内优势性质（命题 7.2）。
+
+本摘要只复述其中 4 条主线的结论并标注前提，不替代 PDF 的推导正文。
 
 ---
 
