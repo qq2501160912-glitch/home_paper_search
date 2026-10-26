@@ -15,6 +15,10 @@ home_paper_search/
     errata.md                             # 该综述的审读勘误
     assets/
       reinforcement-learning-survey.pdf   # 全文 PDF
+  2026-10-26/
+    00-dsp-bidding-algorithms.md          # 广告 DSP 出价算法综述
+    assets/
+      dsp-bidding-algorithms.pdf
 ```
 
 每个 `.md` 是一次检索/保存的批次报告，包含论文表格与完整摘要；
@@ -25,6 +29,7 @@ home_paper_search/
 | 日期 | 标题 | 材料 |
 |---|---|---|
 | 2026-10-25 | 强化学习：从试错学习到推理智能 | [摘要](2026-10-25/00-reinforcement-learning-survey.md) · [PDF 全文](2026-10-25/assets/reinforcement-learning-survey.pdf)（116 页，79 条参考文献）· [勘误](2026-10-25/errata.md) |
+| 2026-10-26 | 主流广告 DSP 的出价策略与预算分配算法 | [正文](2026-10-26/00-dsp-bidding-algorithms.md) · [PDF 全文](2026-10-26/assets/dsp-bidding-algorithms.pdf)（17 页，20 条核心参考文献） |
 
 ## 同步方式
 
