@@ -17,8 +17,15 @@ home_paper_search/
       reinforcement-learning-survey.pdf   # 全文 PDF
   2026-10-26/
     00-dsp-bidding-algorithms.md          # 广告 DSP 出价算法综述
+    01-bid-shading.md                     # 论文批次：一价下出价折扣
+    02-auto-bidding.md                    # 论文批次：自动出价
+    03-conversion-rate-prediction.md      # 论文批次：CVR 预估
+    04-ctr-prediction.md                  # 论文批次：CTR 预估
+    05-rtb-buy-side-survey.md             # 实时竞价（RTB）买入侧全链路综述
     assets/
       dsp-bidding-algorithms.pdf
+      rtb-buy-side-survey.pdf|.docx       # 买入侧综述全文（Markdown 版另附）
+      rtb_sim.py                          # 该综述的四组仿真脚本
 ```
 
 每个 `.md` 是一次检索/保存的批次报告，包含论文表格与完整摘要；
@@ -30,6 +37,7 @@ home_paper_search/
 |---|---|---|
 | 2026-10-25 | 强化学习：从试错学习到推理智能 | [摘要](2026-10-25/00-reinforcement-learning-survey.md) · [PDF 全文](2026-10-25/assets/reinforcement-learning-survey.pdf)（116 页，79 条参考文献）· [勘误](2026-10-25/errata.md) |
 | 2026-10-26 | 主流广告 DSP 的出价策略与预算分配算法 | [正文](2026-10-26/00-dsp-bidding-algorithms.md) · [PDF 全文](2026-10-26/assets/dsp-bidding-algorithms.pdf)（17 页，20 条核心参考文献） |
+| 2026-10-26 | 实时竞价（RTB）买入侧全链路技术综述：从流量、预估到出价与度量 | [正文](2026-10-26/05-rtb-buy-side-survey.md) · [PDF 全文](2026-10-26/assets/rtb-buy-side-survey.pdf)（19 页，32 条参考文献，含 4 组仿真） |
 
 ## 同步方式
 
