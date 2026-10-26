@@ -12,13 +12,13 @@
 
 本报告的核心判断有五条：
 
-1. **今天的工业界主流不是某一种"算法"，而是"统一的受约束最优化骨架 + 多套求解器"。** 几乎所有主流平台把问题写成同一个线性规划（LP）形式，通过对偶变换得到一个**出价公式**，真正需要在线估计的只有少数几个对偶变量。Google、阿里妈妈、Facebook 的公开材料在这一点上高度一致。这不是巧合，而是 LP 对偶结构的必然结果。
+1. **今天的工业界主流不是某一种"算法"，而是"统一的受约束最优化骨架 + 多套求解器"。** 几乎所有主流平台把问题写成同一个线性规划（LP）形式，通过对偶变换得到一个**出价公式**，真正需要在线估计的只有少数几个对偶变量。**Google** 的研究团队在公开综述中把该骨架写成教科书形式，**阿里妈妈**的公开材料自述其出价形式建立在同一结构之上。这不是巧合，而是 LP 对偶结构的必然结果。（注意：Google 是否在线使用此骨架属推断，Meta 未公开任何相关材料。）
 
-2. **出价公式几乎是同一族：$b_j=\dfrac{v_j+\sum_c\alpha_c w^c_j}{\lambda+\sum_c\alpha_c}$。** 预算约束与 tCPA/tROAS 约束的差别，只体现在 $w^c_j$ 与 $\alpha_c$ 的取法上。我做了数值验证：用该公式求得的解与"贪心地按性价比截断"的 LP 最优解**完全一致（价值比 1.0000）**。
+2. **出价公式几乎是同一族：$b_j=\dfrac{v_j+\sum_c\alpha_c w^c_j}{\lambda+\sum_c\alpha_c}$。** 预算约束与 tCPA/tROAS 约束的差别，只体现在 $w^c_j$ 与 $\alpha_c$ 的取法上。在合成数据上（$n=2000$），只要取到最优对偶变量，该公式选中的流量集合与"按性价比 $v/p$ 贪心截断"得到的 LP 最优解**逐条相同，价值比 1.0000**；这一等价性来自对偶最优性，在样本量小时属于近似，并非精确恒等式。
 
-3. **一价拍卖已经彻底取代二价，Bid Shading 从"可选优化"变成"必需组件"。** 行业口径显示约 **96% 的程序化请求以一价成交**（2022 年为 88%）。在一价下"按价值出价"是明显次优的，DSP 必须同时估计"我值多少"和"我需要出多少才赢"。Bid Shading 因此从独立模块下沉为出价链路的标准环节。
+3. **一价已成为程序化交易的主流机制，Bid Shading 从"可选优化"变成"必需组件"。** 行业口径显示约 **96% 的程序化请求以一价成交**（2022 年为 88%，证据等级 C，单一来源）。在一价下"按价值出价"是明显次优的，DSP 必须同时估计"我值多少"和"我需要出多少才赢"。Bid Shading 因此从独立模块下沉为出价链路的标准环节。
 
-4. **预算平滑（pacing）的技术路线已经从 PID 走向"对偶变量的学习型调节"，并在 2019 年后大规模转向强化学习与生成式模型。** 阿里妈妈公开的演进路线是四代：经典控制（PID）→ 规划求解（LP/Online-LP）→ 强化学习（仿真/离线/在线）→ 生成式（AIGB）。其中 AIGB 发表于 KDD 2024，并在线上 AB 中报告 **GMV +4.2%、ROI +5.6%**。
+4. **预算平滑（pacing）的技术路线已经从 PID 走向"对偶变量的学习型调节"，并在 2019 年后大规模转向强化学习与生成式模型。** 阿里妈妈公开的演进路线是四代：经典控制（PID）→ 规划求解（LP/Online-LP）→ 强化学习（仿真/离线/在线）→ 生成式（AIGB）。其中 AIGB 发表于 KDD 2024，并在线上 AB 中报告 **GMV +4.2%、ROI +5.6%**（厂商自述，未独立复现）。
 
 5. **2024—2026 的真正变化不在公式，而在"谁来决策"。** 三大平台都在把出价决策进一步封装进代理（agent）：Google 的 Ads Advisor、Meta 的 Advantage+、The Trade Desk 的 Koa。但值得注意的是：**没有一家把"完全无人监督的自主出价"作为默认**。这提示一个判断——出价算法本身已相对成熟，瓶颈转移到了可解释性、增量性与信任。
 
@@ -54,9 +54,9 @@
 - $p_j$：**竞争价格**（其他买家的最高报价或结算价，未知）；
 - $x_j\in[0,1]$：是否赢得（决策变量）。
 
-DSP 面临两类约束：**预算约束** $\sum_j p_j x_j \le B$，以及**成本约束**（tCPA / tROAS / ROI）。Gagan Aggarwal 等 24 位 Google 研究者在 2024 年的综述里把这一切统一成如下规划（下称"出价问题"）[^survey]：
+DSP 面临两类约束：**预算约束** $\sum_j p_j x_j \le B$，以及**成本约束**（tCPA / tROAS / ROI）。Gagan Aggarwal 等 **25 位** Google 研究者在 2024 年的综述里把这一切统一成如下规划（下称"出价问题"）[^survey]：
 
-[^survey]: Aggarwal, Badanidiyuru, Balseiro 等 24 人. *Auto-bidding and Auctions in Online Advertising: A Survey*. arXiv:2408.07685, 2024.
+[^survey]: Aggarwal, Badanidiyuru, Balseiro 等 25 人. *Auto-bidding and Auctions in Online Advertising: A Survey*. arXiv:2408.07685, 2024.
 
 $$
 \max_{\{x_j\}}\ \sum_j \left(v_j x_j - \lambda\, p_j x_j\right)
@@ -88,7 +88,7 @@ $$
 
 ### 2.1 对偶推导
 
-对上式引入拉格朗日乘子：预算约束对应 $\alpha_B\ge 0$，RoS 约束对应 $\alpha_T\ge 0$。对偶问题给出的**出价公式**（综述式 (7)）为：
+对上式引入拉格朗日乘子：预算约束对应 $\alpha_B\ge 0$，RoS 约束对应 $\alpha_T\ge 0$。对偶问题给出的**出价公式**（综述式 (6)）为：
 
 $$
 \boxed{\;
@@ -115,11 +115,11 @@ $$
 | 对偶出价 $b=v/(1+\alpha_B)$，$\alpha_B=0.3812$ | 500.27 | 2301.28 | 赢下 72.10% 的流量 |
 | 贪心截断（LP 最优参照） | 500.27 | 2301.28 | 取 1442 条 |
 
-**两者价值比 = 1.0000。** 这印证了定理 3.1 的结论：只要拿到最优对偶变量，出价公式给出的结果与最优分配完全一致[^survey]。
+**两者价值比 = 1.0000**（两条路径命中的是同一族流量，逐条比对一致）。这印证了定理 3.1 的结论：只要拿到最优对偶变量，出价公式给出的结果与最优分配完全一致[^survey-thm]。
 
-[^survey]: 同上，Theorem 3.1。
+[^survey-thm]: [^survey] Theorem 3.1。
 
-> **严谨性注记**：定理成立的前提是**拍卖是"真实"（truthful）的**——即"报出真实价值"是占优策略。二价（GSP/VCG 类）满足，一价**不满足**。这就是第 3 章要处理的问题。
+> **严谨性注记**：定理成立有**两个**前提——一是拍卖必须"真实"（truthful），即"报出真实价值"是占优策略，二价（SPA/VCG）满足，而一价与 GSP **不满足**；二是 $x_j$ 要取 LP 的极值解（每条流量"整条取"或"整条不取"），综述指出当流量流足够大时极值解近乎取整。两个前提在本节的仿真中都已满足，所以结果才精确一致。一价环境下的处理是第 3 章的主题。
 
 ### 2.3 工程上真正难的部分：$\alpha$ 从哪来
 
@@ -153,7 +153,7 @@ $$
 
 当预算与 RoS 两个约束同时存在时，如果两个 pacing 系统各自独立运行（"完全解耦的顺序算法"），综述引用的结果显示**效果可能很差、且会违反约束**；而"最小耦合"（各服务独立运行、但共享少量信息）的方案可以接近完全耦合的最优性能[^survey-decouple]。
 
-[^survey-decouple]: 同上 §3.2，引 Balseiro et al. (2023b)。
+[^survey-decouple]: [^survey] §3.2 末段，引 Balseiro et al. (2023b)。
 
 工程含义：**预算与成本这两套 pacing 不能各调各的**。实践中常见做法是让二者共用一个对偶变量更新环，或至少共享消耗速率与达标情况这两个信号。
 
@@ -170,10 +170,10 @@ $$
 
 所以最优出价必然**低于**价值。这个"低于"的比例就是 shading factor。
 
-行业数据：约 **96% 的程序化竞价以一价成交**（2022 年约 88%）[^bidscube]。Google 在 2019 年、Twitter 在 2020 年先后转向一价[^survey-fpa]。
+行业数据：约 **96% 的程序化竞价以一价成交**（2022 年约 88%）[^bidscube]——该数字来自单一行业媒体、证据等级 C，宜作量级参考而非精确统计。机制层面：Google 在 2019 年、Twitter 在 2020 年先后转向一价[^survey-fpa]。
 
-[^bidscube]: BidsCube, *What Is Bid Shading and How It Works in First-Price Auctions*, 2026-09. 引 Digital Applied 2026 统计。
-[^survey-fpa]: 见 [^survey] §3.3 及其脚注。
+[^bidscube]: BidsCube, *What Is Bid Shading and How It Works in First-Price Auctions*, 2026-09. 引 Digital Applied 2026 统计（等级 C）。
+[^survey-fpa]: 见 [^survey] §3.3 及其脚注（综述对一价化进程的机制性描述）。
 
 ### 3.2 一个朴素的模型与它的教训
 
@@ -183,20 +183,23 @@ $$
 U(\alpha)=\Pr[\alpha v>h]\cdot v(1-\alpha).
 $$
 
-第一项随 $\alpha$ 上升，第二项随 $\alpha$ 下降 —— **存在一个内点最优**。我用对数正态竞争价（$h\sim\mathrm{LN}(0,0.6)$）做了 $2\times10^5$ 次采样：
+第一项随 $\alpha$ 上升，第二项随 $\alpha$ 下降 —— **存在一个内点最优**。我用对数正态竞争价（$h\sim\mathrm{LN}(0,0.6)$）做了 $2\times10^5$ 次采样（判赢条件 $h<\alpha v$）：
 
 | $\alpha$ | 胜率 | 期望效用 |
 |---|---|---|
-| 0.30 | 2.29% | 0.01601 |
-| 0.50 | 12.45% | 0.06225 |
-| 0.62 | 20.3% | — |
-| **0.70** | **27.50%** | **0.08251**（最优） |
-| 0.80 | 35.35% | 0.07071 |
-| 1.00 | 49.80% | 0.00000 |
+| 0.30 | 2.23% | 0.01563 |
+| 0.50 | 12.45% | 0.06224 |
+| 0.62 | 21.36% | 0.08115 |
+| **0.68** | **25.73%** | **0.08327**（数值最优） |
+| 0.70 | 27.63% | 0.08283 |
+| 0.80 | 35.48% | 0.07095 |
+| 1.00 | 50.01% | 0.00000 |
 
-可以看到：**出满价虽然胜率最高（近 50%），但期望效用为零**。这正是"赢家的诅咒"的量化形态。
+可以看到：**出满价虽然胜率最高（约 50%），但期望效用为零**。这正是"赢家的诅咒"的量化形态。
 
-> **注意**：最优 $\alpha$ 强烈依赖竞争价的分布，我这里的 0.70 并非普遍常数。文献中常被引用的两个数字是 **0.5**（鲁棒最坏情形下的经典解，Kasberger & Schlag 2023）与 **0.38**（均匀价值分布下、考虑分布后可做到比 0.5 更优）。
+> **口径说明**：上表为按上述模型参数重跑的结果（种子固定）。该模型有闭式解 $\Pr[h<\alpha]=\Phi\!\left(\frac{\ln\alpha}{\sigma}\right)$，最优 $\alpha\approx0.6764$（效用 0.08327），与数值扫描一致；表中 0.70 行与 0.68 行仅相差 0.5%，说明最优附近很平坦。
+
+> **注意**：最优 $\alpha$ 强烈依赖竞争价的分布，我这里的 0.68 并非普遍常数。文献中常被引用的两个数字是 **0.5**（鲁棒最坏情形下的经典解，Kasberger & Schlag 2023）与 **0.38**（均匀价值分布下、考虑价值分布后可做到比 0.5 更优）。
 > 这里恰恰是"厂商宣传"与"学术结论"最容易脱节的地方：**没有任何一个固定百分比是普适的**。
 
 ### 3.3 Shading 的算法谱系
@@ -229,7 +232,7 @@ $$
 
 提升约 **3.36%**。别小看这个数字——在成熟投放里，3% 的效用提升往往是团队季度级的优化目标。
 
-有意思的是，Google 的实验研究还发现了一个非直觉现象：当非均匀程度（簇数）提高时，**一价拍卖的利润和福利都下降**，而 GSP 是利润升、福利降，VCG 则几乎不变[^survey-emp]。这说明"允许买家用更细的颗粒度出价"对卖方未必有利。
+有意思的是，Deng et al.（WWW 2024，**基于合成数据**的仿真研究）还发现了一个非直觉现象：当非均匀程度（簇数）提高时，**一价拍卖的利润和福利都下降**，而 GSP 是利润升、福利降，VCG 则几乎不变[^survey-emp]。这说明"允许买家用更细的颗粒度出价"对卖方未必有利。
 
 [^survey-emp]: 见 [^survey] §6.3，引 Deng et al. (2024c)。
 
@@ -298,9 +301,9 @@ $$
 | 三代-C | Online RL（SORL） | 与线上交互 | 解决一致性，需安全探索 |
 | 四代 | 生成式（AIGB） | 历史轨迹 | **GMV +4.2%、ROI +5.6%** |
 
-其中 AIGB 是发表级证据最强的：论文《AIGB: Generative Auto-bidding via Conditional Diffusion Modeling》被 **KDD 2024** 接收（arXiv:2405.16141），报告在阿里广告平台**大规模预算 AB、长周期观测**下的 GMV +4.2%、ROI +5.6%[^aigb]。
+其中 AIGB 是**线上 AB 证据最强**的一项（注意：效果为厂商自述，未独立复现）：论文《AIGB: Generative Auto-bidding via Conditional Diffusion Modeling》被 **KDD 2024** 接收（arXiv:2405.16141），报告在阿里广告平台**大规模预算 AB、长周期观测**下的 GMV +4.2%、ROI +5.6%[^aigb]。
 
-[^aigb]: Guo, Huo, Zhang 等. *AIGB: Generative Auto-bidding via Diffusion Modeling*. KDD 2024. arXiv:2405.16141.
+[^aigb]: Guo, Huo, Zhang 等. *AIGB: Generative Auto-bidding via Conditional Diffusion Modeling*. KDD 2024. arXiv:2405.16141（arXiv 预印本标题为 "…via Diffusion Modeling"，录用版加了 "Conditional"）。
 
 此外，阿里妈妈 2025 年披露的 Model-based RL（MBRL）新范式也已在其多个场景"完成扩流"，报告大盘覆盖计划 **消耗 +3.5% / GMV +4.5%**[^mbrl]。
 
@@ -315,10 +318,12 @@ $$
 | Mou et al., Sustainable Online RL for Auto-bidding（NeurIPS） | 2022 | SORL：安全在线探索 + V-CQL | 阿里妈妈线上 |
 | Kumar et al., Conservative Q-Learning（CQL） | 2020 | 离线 RL 的保守正则 | 离线出价通用组件 |
 | Kostrikov et al., Implicit Q-Learning（IQL） | 2021 | 用 in-sample 学习避开 OOD 查询 | 阿里妈妈在 CQL 之后的改进方向 |
-| Zhou et al., Off-Policy Safe RL with Real-Time Budget Constraints | 2023 | 带硬预算约束的安全离线 RL | 学术→工程过渡 |
+| Lin et al., Safe Offline RL with Real-Time Budget Constraints | 2023 | 离线安全 RL：在**实时**预算约束下学习策略（非在线 no-regret 路线） | 学术→工程过渡 |
 | Guo et al., AIGB（KDD） | 2024 | **生成式出价**，避免长序列误差累积 | 阿里妈妈大规模部署 |
 
 > **一个诚实的说明**：Google / Meta 的出价算法细节基本不公开。上面这张表里"广泛采用"的判断，主要基于阿里妈妈等公开材料自述其出价形式源自 USCB，以及 Google 综述对这些结构性结论的确认——**不是**基于对 Google 内部实现的直接证据。
+>
+> **补注**：上表最后一条（Lin et al., 2023）与本章§5.1 讨论的对偶梯度/在线学习路线是**并列关系而非同一路线**。综述 §3.2 中讨论"双约束下带违约界的 no-regret 算法"时引用的是 Aggarwal et al. (2024b)，见参考文献第 14 条。
 
 ---
 
@@ -326,7 +331,7 @@ $$
 
 ### 6.1 三巨头 + 第三方
 
-**Google（Ads / DV360）**。产品层是 Smart Bidding 家族（tCPA、tROAS、Maximize Clicks / Conversions / Conversion Value）。其研究团队 2024 年的综述与本研究方向完全同构，说明其内部基础是"受约束最优化 + 对偶出价"。2026 年 Google Marketing Live 的表述是 Gemini 正在成为"DV360 真正的操作层"，配套的 Ads Advisor 已 GA[^agentic]。
+**Google（Ads / DV360）**。产品层是 Smart Bidding 家族（tCPA、tROAS、Maximize Clicks / Conversions / Conversion Value）。其研究团队 2024 年的综述给出了"受约束最优化 + 对偶出价"的完整框架，**据此推断**其内部基础同构——但这是基于公开研究成果的推断，不是对 Google 线上实现的直接证据。2026 年 Google Marketing Live 的表述是 Gemini 正在成为"DV360 真正的操作层"，配套的 Ads Advisor 已 GA[^agentic]。
 
 [^agentic]: AgentMarketCap. *The Agentic Advertising Stack*. 2026-07；及 MediaPost 对 TTD 的报道（下文）。
 
@@ -334,7 +339,7 @@ $$
 
 [^meta-risk]: PPC Land. *Meta's AI advertising gamble: Brand control versus algorithmic efficiency*. 2025-10.
 
-**The Trade Desk（Koa）**。以"一价拍卖历史成交价建模"为核心，公开报道其 Koa 引擎相对人工优化有 **20–30% 的性能提升**；2026 年 8 月的 Kokai Zuma 更新声称平均 **CPA 改善 32%**[^ttd]。值得注意的是 TTD 的定位：其代理产品明确"只给建议、不自主出价"，主张"架构重于自主"。
+**The Trade Desk（Koa）**。公开报道称其以一价历史成交价建模为核心，Koa 引擎相对人工优化有 **20–30% 的性能提升**（等级 C，厂商口径）；2026 年 8 月的 Kokai Zuma 更新声称平均 **CPA 改善 32%**[^ttd]。值得注意的是 TTD 的定位：其代理产品明确"只给建议、不自主出价"，主张"架构重于自主"。
 
 [^ttd]: MediaPost. *Trade Desk Goes Agentic, Simplifies Programmatic Buying — Just Ask Koa*. 2026-08-27.
 
@@ -346,13 +351,15 @@ $$
 
 | 维度 | Google | Meta | TTD | 阿里妈妈 |
 |---|---|---|---|---|
-| 出价形式 | 受约束 LP 对偶 | 未公开 | 一价成交价建模 | USCB 对偶公式 |
+| 出价形式 | 受约束 LP 对偶（**推断**） | 未公开 | 一价成交价建模（**媒体转述**） | USCB 对偶公式 |
 | 预算 pacing | 有（未公开细节） | 有 | 有 | PID→LP→RL→生成式 |
-| Bid shading | 市场层面处理 | N/A（自营库存） | **核心能力** | MEBS 等多任务方案 |
+| Bid shading | 市场层面处理（推断） | N/A（自营库存） | **核心能力** | MEBS 等多任务方案 |
 | RL 出价 | 研究层面确认 | 未公开 | 未公开 | **已论文+线上** |
 | 生成式出价 | 未公开 | 未公开 | 未公开 | **AIGB（KDD 2024）** |
 | 自主程度 | 全生命周期自动化 | 高度自主（默认） | 仅建议 | 平台侧自动 |
-| 证据等级 | A/B | B/C | C | A（论文）/B（博客） |
+| 证据等级 | A/B（研究）/ D（实现推断） | B/C | C | A（论文）/B（博客） |
+
+> 表中标"推断/媒体转述"的单元格**不是**厂商披露的一手事实，不应作为选型依据。
 
 ---
 
@@ -380,7 +387,7 @@ $$
 
 1. **隐私与信号衰退**。第三方 cookie 退场后，跨站特征减少，$v_j$ 的估计精度下降。DSP 的共同应对是转向第一方数据、上下文信号与服务端集成。但值得注意的是：Meta 的 Advantage+ 本身就是 2022 年应对 iOS 14.5 的产物[^meta-risk]——**隐私压力是自动化加速的推手，而非阻力**。
 
-2. **Agentic 化的真实含义**。2026 年三大平台都在推代理。但 TTD 明确选择"只建议"，Meta 选择"默认自主"。这个分歧的核心不是技术，而是**责任归属**：谁为一次糟糕的自动决策负责。Forrester 甚至预测 2026 年代理行业 15% 的岗位会消失——这提示读者，出价自动化正在从"优化工具"变成"组织变革"。
+2. **Agentic 化的真实含义**。2026 年三大平台都在推代理。但 TTD 明确选择"只建议"，Meta 选择"默认自主"。这个分歧的核心不是技术，而是**责任归属**：谁为一次糟糕的自动决策负责。有分析机构预测 2026 年代理化会显著改变营销岗位构成（等级 C，未独立核实）——这提示读者，出价自动化正在从"优化工具"变成"组织变革"。
 
 3. **增量性与评估污染**。当平台同时负责投放与归因，评估就存在结构性利益冲突。这是目前最被低估的问题。
 
@@ -388,9 +395,9 @@ $$
 
 5. **跨平台最优**。已证明"只调预算可达全局最优"，但**如何在信息不共享的多平台间实现**仍是难题。
 
-6. **理论 vs 实证的张力**。综述明确指出，PoA（无政府代价）是最坏情形分析，而真实市场的均衡福利通常好得多；同时实证发现"更好的自动出价反而降低拍卖效率"[^dilemma]。理论与实践的落差本身就是一个值得研究的问题。
+6. **理论 vs 实证的张力**。综述明确指出，PoA（无政府代价）是最坏情形分析，而真实市场的均衡福利通常好得多；同时也有行业分析认为"更好的自动出价反而降低拍卖效率"[^dilemma]。理论与实践的落差本身就是一个值得研究的问题，但后者属非同行评审观点，引用时需谨慎。
 
-[^dilemma]: Google Research. *Autobidder's Dilemma: Why Better Autobidders Lead to Worse Auction Efficiency*.
+[^dilemma]: 该标题的行业分析文章（等级 C）。注意其立场与 Google 相异，且非同行评审研究；综述中对"实证 vs 理论落差"的讨论见 [^survey] §6.3。
 
 ---
 
@@ -401,7 +408,7 @@ $$
 | 实验 | 设置 | 关键结论 |
 |---|---|---|
 | 对偶出价 vs 贪心 | $n=2000$，$v,p\sim$ 对数正态，$B=500$，$\tau=0.8$，二分求 $\alpha_B$ | 价值比 1.0000 |
-| 折扣乘子扫描 | $h\sim\mathrm{LN}(0,0.6)$，$2\times10^5$ 采样 | 最优 $\alpha=0.70$，出满价效用为 0 |
+| 折扣乘子扫描 | $h\sim\mathrm{LN}(0,0.6)$，$2\times10^5$ 采样，判赢 $h<\alpha$ | 最优 $\alpha\approx0.68$（闭式 0.6764），出满价效用为 0 |
 | 非均匀出价 | 4 簇，竞争价均值递增 | 提升 3.36% |
 | 对偶梯度 pacing | $m=40000$，$B=1000$，$\eta\propto 1/\sqrt{m}$，加硬截断 | 花费 1000.29/1000 |
 
@@ -437,10 +444,10 @@ $$
 
 ## 参考文献（核心 20 条）
 
-1. G. Aggarwal, A. Badanidiyuru, S. R. Balseiro, 等 24 人. *Auto-bidding and Auctions in Online Advertising: A Survey*. arXiv:2408.07685, 2024.
+1. G. Aggarwal, A. Badanidiyuru, S. R. Balseiro, 等 **25 人**（均属 Google）. *Auto-bidding and Auctions in Online Advertising: A Survey*. arXiv:2408.07685, 2024.
 2. Y. He, X. Chen, D. Wu, 等. *A Unified Solution to Constrained Bidding in Online Display Advertising*. KDD 2021.
-3. J. Guo, Y. Huo, Z. Zhang, 等. *AIGB: Generative Auto-bidding via Conditional Diffusion Modeling*. KDD 2024, arXiv:2405.16141.
-4. Z. Mou, Y. Huo, R. Bai, 等. *Sustainable Online RL for Auto-bidding*. NeurIPS 2022.
+3. J. Guo, Y. Huo, Z. Zhang, 等. *AIGB: Generative Auto-bidding via Conditional Diffusion Modeling*. KDD 2024, arXiv:2405.16141（预印本标题无 "Conditional"）.
+4. Z. Mou, Y. Huo, R. Bai, 等. *Sustainable Online Reinforcement Learning for Auto-bidding*. NeurIPS 2022.
 5. S. Balseiro, Y. Gur. *Learning in Repeated Auctions with Budgets: Regret Minimization and Equilibrium*. Management Science, 2019.
 6. D. Wu, X. Chen, X. Yang, 等. *Budget Constrained Bidding by Model-free RL in Display Advertising*. CIKM 2018.
 7. D. Gligorijevic, T. Zhou, B. Shetty, 等. *Bid Shading in the Brave New World of First-Price Auctions*. CIKM 2020.
@@ -451,7 +458,7 @@ $$
 12. I. Kostrikov, A. Nair, S. Levine. *Offline RL with Implicit Q-Learning*. arXiv:2110.06169, 2021.
 13. R. Ai, C. Wang, 等. *No-regret Learning in Repeated First-Price Auctions with Budget Constraints*. arXiv:2205.14572, 2022.
 14. G. Aggarwal, G. Fikioris, M. Zhao. *No-Regret Algorithms in non-Truthful Auctions with Budget and ROI Constraints*. arXiv:2404.09832, 2024.
-15. Q. Lin, B. Tang, Z. Wu, 等. *Off-Policy Safe RL with Real-Time Budget Constraints*. arXiv:2306.00603, 2023.
+15. Q. Lin, B. Tang, Z. Wu, 等. *Safe Offline Reinforcement Learning with Real-Time Budget Constraints*. arXiv:2306.00603, 2023.
 16. H. Zhang, L. Niu, Z. Zheng, 等. *A Personalized Automated Bidding Framework for Fairness-aware Online Advertising*. KDD 2023.
 17. 阿里妈妈技术. *强化学习在广告自动出价场景的大规模落地实践*. 2024-01.
 18. 阿里妈妈技术. *Model-based RL 自动出价算法的演进之路*. 2025-01.
@@ -467,3 +474,24 @@ $$
 - 所有厂商宣称的效果数字均标注来源与等级，**未经独立复现的不作因果结论**。
 - 第 6 章中关于 Google / Meta 内部实现的部分，属于基于其公开研究成果的**合理推断**，非直接证据。
 - 报告不构成任何平台选型或投放策略建议。
+
+---
+
+## 修订记录
+
+**v2（2026-10-26，核校后修订）** —— 本次修订基于对综述原文（arXiv:2408.07685v1）、各引文元数据（arXiv / Crossref）及仿真口径的逐项复核：
+
+| # | 位置 | 原文 | 修订后 | 依据 |
+|---|---|---|---|---|
+| 1 | 摘要①、§6.1 | "Google、阿里妈妈、Facebook 的公开材料高度一致" | 删除 Facebook | 综述全文未引用 Meta 关于出价公式的任何材料 |
+| 2 | §2.1 | "综述式 (7)" | 综述**式 (6)** | 式 (7) 仅指"预算+RoS"特例 |
+| 3 | §2.2 | "完全一致（价值比 1.0000）"；注记仅提 truthful | 补充"LP 极值解"前提，说明为近似 | 综述 Theorem 3.1 及 §3.1 原文 |
+| 4 | §3.1、摘要③ | "已彻底取代二价" | "已成为程序化交易主流机制"，96% 标注等级 C | 数字为单一二手来源 |
+| 5 | §3.2 表 | α=0.62 胜率 20.3%、效用"—"；最优 0.70 | 全表按模型重算，最优 α≈0.68（闭式 0.6764） | 原表 0.62 行与同模型不自洽 |
+| 6 | §3.4 | "**Google 的实验研究**" | "Deng et al. 基于**合成数据**的仿真研究" | Deng et al. 2024 原文明确为 synthetic dataset |
+| 7 | §5.2 | "发表级证据最强" | "线上 AB 证据最强（未独立复现）" | 效果数字为厂商自述 |
+| 8 | §5.3、参考文献 15 | "Off-Policy Safe RL with…"（Zhou et al.） | *Safe Offline RL with…*（Lin et al.） | arXiv:2306.00603 实际标题与作者不符 |
+| 9 | §6.2 矩阵 | Google/TTD 出价形式列为既定事实 | 标注"推断"/"媒体转述"，加说明行 | 与 §5.3 诚实声明自洽 |
+| 10 | §8.6、脚注 | "Google Research. Autobidder's Dilemma…" | 更正为行业分析文章（等级 C） | 该文并非 Google Research 出品 |
+| 11 | 全文 | 综述"等 24 人" | 等 **25 人**（均属 Google） | arXiv 作者列表 |
+| 12 | §2.2 等 | `[^survey]` 脚注被重复定义 | 拆分为 `survey-thm` / `survey-decouple` 等 | 原写法会导致渲染时脚注被覆盖 |
