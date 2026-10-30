@@ -2,3 +2,8 @@ Thumbs.db
 .DS_Store
 desktop.ini
 *.tmp
+
+# PDF 构建中间产物（可由 katex_render.js 重新生成，字体以 base64 内嵌，体积大）
+2026-10-30/assets/katex_fonts.css
+2026-10-30/assets/math_resolved.md
+__pycache__/
