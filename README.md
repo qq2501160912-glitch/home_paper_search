@@ -26,6 +26,12 @@ home_paper_search/
       dsp-bidding-algorithms.pdf
       rtb-buy-side-survey.pdf|.docx       # 买入侧综述全文（Markdown 版另附）
       rtb_sim.py                          # 该综述的四组仿真脚本
+  2026-10-30/
+    00-dsp-bidding-response-strategy.md   # DSP 竞价应对策略：反馈调整、控制闭环与落地路径
+    assets/
+      bid_strategy_toolkit.py             # 该报告的完整可运行实现（删失估计/折价/控制器 + 五个实验）
+      make_figures.py                     # 图表生成脚本
+      fig1..fig5-*.png                    # 报告引用的五张图
 ```
 
 每个 `.md` 是一次检索/保存的批次报告，包含论文表格与完整摘要；
@@ -38,6 +44,7 @@ home_paper_search/
 | 2026-10-25 | 强化学习：从试错学习到推理智能 | [摘要](2026-10-25/00-reinforcement-learning-survey.md) · [PDF 全文](2026-10-25/assets/reinforcement-learning-survey.pdf)（116 页，79 条参考文献）· [勘误](2026-10-25/errata.md) |
 | 2026-10-26 | 主流广告 DSP 的出价策略与预算分配算法 | [正文](2026-10-26/00-dsp-bidding-algorithms.md) · [PDF 全文](2026-10-26/assets/dsp-bidding-algorithms.pdf)（17 页，20 条核心参考文献） |
 | 2026-10-26 | 实时竞价（RTB）买入侧全链路技术综述：从流量、预估到出价与度量 | [正文](2026-10-26/05-rtb-buy-side-survey.md) · [PDF 全文](2026-10-26/assets/rtb-buy-side-survey.pdf)（19 页，32 条参考文献，含 4 组仿真） |
+| 2026-10-30 | DSP 竞价应对策略调研：算法方向、工业实践与落地路径 | [正文](2026-10-30/00-dsp-bidding-response-strategy.md) · [配套代码](2026-10-30/assets/bid_strategy_toolkit.py)（删失估计 / 折价 / 控制器，5 组仿真，仅依赖 numpy） |
 
 ## 同步方式
 
