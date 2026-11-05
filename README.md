@@ -35,6 +35,14 @@ home_paper_search/
       katex_render.js                     # 公式渲染（调用本地 KaTeX，用 node 运行）
       build_pdf.py                        # HTML + Headless Chrome 导出 PDF
       fig1..fig5-*.png                    # 报告引用的五张图
+  2026-11-06/
+    00-ad-platforms-dsp-uac-survey.md     # 主流广告平台与竞价市场博弈综述（DSP / UAC）
+    ad-platforms-dsp-uac-survey.pdf       # 该报告全文 PDF（19 页，含 5 张仿真图）
+    assets/
+      roi_bidding_sim.py                  # 五个可复现仿真实验（ROI 约束/竞争/预估偏差/博弈/可行域）
+      build_pdf.py                        # Markdown → PDF（WeasyPrint + 中文字体）
+      figures/fig1..fig5-*.png            # 报告引用的五张图
+      research/DSP-2026-研究备忘.md        # 支撑本报告的 DSP 市场调研原始备忘
 ```
 
 每个 `.md` 是一次检索/保存的批次报告，包含论文表格与完整摘要；
@@ -48,6 +56,7 @@ home_paper_search/
 | 2026-10-26 | 主流广告 DSP 的出价策略与预算分配算法 | [正文](2026-10-26/00-dsp-bidding-algorithms.md) · [PDF 全文](2026-10-26/assets/dsp-bidding-algorithms.pdf)（17 页，20 条核心参考文献） |
 | 2026-10-26 | 实时竞价（RTB）买入侧全链路技术综述：从流量、预估到出价与度量 | [正文](2026-10-26/05-rtb-buy-side-survey.md) · [PDF 全文](2026-10-26/assets/rtb-buy-side-survey.pdf)（19 页，32 条参考文献，含 4 组仿真） |
 | 2026-10-30 | DSP 竞价应对策略调研：算法方向、工业实践与落地路径 | [正文](2026-10-30/00-dsp-bidding-response-strategy.md) · [PDF 全文](2026-10-30/dsp-bidding-response-strategy.pdf)（19 页，公式 KaTeX 渲染）· [配套代码](2026-10-30/assets/bid_strategy_toolkit.py)（删失估计 / 折价 / 控制器，5 组仿真，仅依赖 numpy） |
+| 2026-11-06 | 主流广告平台与竞价市场博弈综述：DSP / UAC 深度调研 | [正文](2026-11-06/00-ad-platforms-dsp-uac-survey.md) · [PDF 全文](2026-11-06/ad-platforms-dsp-uac-survey.pdf)（19 页，含 5 张仿真图）· [配套代码](2026-11-06/assets/roi_bidding_sim.py)（5 组仿真，仅依赖 numpy） |
 
 ## 同步方式
 
