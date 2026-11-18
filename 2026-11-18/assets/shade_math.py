@@ -67,14 +67,36 @@ for alpha in (1.0, 2.0, 3.0):
         row.append('b=%gxm: eps=%.2f s*=%.2f' % (mult, e, shade(e)))
     print('  alpha=%.1f  ' % alpha + ' | '.join(row))
 
-print('\n== 5) 对数正态：按出价分位的 eps 与 s*（表 2-1）')
+def G_lognormal(b, mu, sigma):
+    return ND.cdf((math.log(b) - mu) / sigma) if b > 0 else 0.0
+
+
+def opt_shade(v, mu, sigma, steps=200):
+    """网格搜索真实最优折价（含边界解），不是把公式套在任意点上。"""
+    best_s, best_val = 0.5, -1e18
+    for i in range(1, steps + 1):
+        s = i / steps
+        val = (v - s * v) * G_lognormal(s * v, mu, sigma)
+        if val > best_val:
+            best_s, best_val = s, val
+    return best_s
+
+
+print('\n== 5) 对数正态：价值处在竞争价分布不同分位时的最优折价（表 2-1，网格搜索）')
 for sigma in (0.3, 0.6, 1.0, 1.5):
     row = []
     for q in (0.50, 0.70, 0.85, 0.95):
-        b = math.exp(ND.inv_cdf(q) * sigma)
-        e = eps_lognormal(b, 0.0, sigma)
-        row.append('q%.2f: eps=%.2f s*=%.2f' % (q, e, shade(e)))
+        v = math.exp(ND.inv_cdf(q) * sigma)
+        row.append('q%.2f: s*=%.2f' % (q, opt_shade(v, 0.0, sigma)))
     print('  sigma=%.1f  ' % sigma + ' | '.join(row))
+
+print('\n== 5b) 对照：把公式 eps/(1+eps) 直接套在"分位点"上会错多少')
+for sigma in (0.6, 1.5):
+    for q in (0.50, 0.95):
+        b = math.exp(ND.inv_cdf(q) * sigma)      # 若在此点出价，G=q
+        wrong = shade(eps_lognormal(b, 0.0, sigma))
+        right = opt_shade(b, 0.0, sigma)
+        print('  sigma=%.1f q=%.2f  公式在分位点上=%.2f  真实最优=%.2f' % (sigma, q, wrong, right))
 
 print('\n== 6) 指数分布：eps 从 1 起随 b 上升，s* 从 0.5 趋于 1')
 for x in (0.1, 0.5, 1.0, 3.0, 10.0):

@@ -188,17 +188,31 @@ def run():
     loss_rows = [r for r in train if 0.6 * r[1] < r[2]]
     print('  只保留输的样本        : %.3f, %.3f, %.3f' % tuple(ols3(loss_rows, lambda r: math.log(r[2]))))
 
-    print('\nE3 竞争水平 -> 最优折价因子')
-    xs, ys = [], []
+    print('\nE3 竞争位置与竞争水平 -> 最优折价因子')
+    # (a) 位置效应：把自己的价值放在该 cell 竞争价分布的 q 分位
+    qs = (0.50, 0.70, 0.85, 0.95)
+    pos = {}
+    for q in qs:
+        vals = []
+        for c in cells:
+            v = math.exp(c['mu'] + SIGMA * ND.inv_cdf(q))
+            if v <= c['floor']:
+                continue
+            vals.append(grid_opt(v, lambda b: G_true(c, b)))
+        pos[q] = sum(vals) / len(vals) if vals else float('nan')
+        print('  v 位于竞争价 P%-3.0f 处：平均 s*=%.3f' % (100 * q, pos[q]))
+    print('  位置从 P50 升到 P95，s* 变化 %+.3f' % (pos[0.95] - pos[0.50]))
+
+    # (b) 水平效应：价值固定（=1.5*floor），把该 cell 的竞争价水平翻倍
+    base, dbl = [], []
     for c in cells:
-        med = math.exp(c['mu'])
-        sv = [grid_opt(v, lambda b: G_true(c, b)) for v in (0.5, 1, 2, 4, 8)]
-        xs.append(math.log(med))
-        ys.append(sum(sv) / len(sv))
-    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
-    slope = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)
-    print('  竞争价中位数翻倍时，平均最优折价因子变化: %+.3f（弹性 %.2f）'
-          % (slope * math.log(2), slope))
+        v = 1.5 * c['floor']
+        base.append(grid_opt(v, lambda b: G_true(c, b)))
+        c2 = dict(c)
+        c2['mu'] = c['mu'] + math.log(2)
+        dbl.append(grid_opt(v, lambda b: G_true(c2, b)))
+    mb, md = sum(base) / len(base), sum(dbl) / len(dbl)
+    print('  价值固定、竞争价中位数翻倍：平均 s* %.3f -> %.3f（%+.3f）' % (mb, md, md - mb))
 
 
 if __name__ == '__main__':
