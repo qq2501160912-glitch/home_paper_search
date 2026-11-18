@@ -44,7 +44,7 @@ home_paper_search/
       figures/fig1..fig5-*.png            # 报告引用的五张图
       research/DSP-2026-研究备忘.md        # 支撑本报告的 DSP 市场调研原始备忘
   2026-11-18/
-    00-first-price-market-competition.md  # 一价竞价竞争强度：可解释因子、量级与只用市场信息的博弈策略
+    00-first-price-market-competition.md  # 一价竞价竞争强度：37 因子 + 28 个新因子 + 40 张方法卡 + 15 个实验
     assets/
       shade_math.py                       # 解析量级表（四族竞争价分布 -> 弹性 -> 折价因子）
       sim_market.py                       # 三组可复现仿真（折价决策/因子系数偏误/竞争-折价弹性）
@@ -62,7 +62,7 @@ home_paper_search/
 | 2026-10-26 | 实时竞价（RTB）买入侧全链路技术综述：从流量、预估到出价与度量 | [正文](2026-10-26/05-rtb-buy-side-survey.md) · [PDF 全文](2026-10-26/assets/rtb-buy-side-survey.pdf)（19 页，32 条参考文献，含 4 组仿真） |
 | 2026-10-30 | DSP 竞价应对策略调研：算法方向、工业实践与落地路径 | [正文](2026-10-30/00-dsp-bidding-response-strategy.md) · [PDF 全文](2026-10-30/dsp-bidding-response-strategy.pdf)（19 页，公式 KaTeX 渲染）· [配套代码](2026-10-30/assets/bid_strategy_toolkit.py)（删失估计 / 折价 / 控制器，5 组仿真，仅依赖 numpy） |
 | 2026-11-06 | 主流广告平台与竞价市场博弈综述：DSP / UAC 深度调研 | [正文](2026-11-06/00-ad-platforms-dsp-uac-survey.md) · [PDF 全文](2026-11-06/ad-platforms-dsp-uac-survey.pdf)（19 页，含 5 张仿真图）· [配套代码](2026-11-06/assets/roi_bidding_sim.py)（5 组仿真，仅依赖 numpy） |
-| 2026-11-18 | 一价竞价中的市场竞争强度：可解释因子、量级与只用市场信息的博弈策略 | [正文](2026-11-18/00-first-price-market-competition.md)（37 个因子、56 篇文献、三轴分类）· [解析脚本](2026-11-18/assets/shade_math.py) · [仿真](2026-11-18/assets/sim_market.py)（三组实验，仅标准库） |
+| 2026-11-18 | 一价竞价中的市场竞争强度：可解释因子、量级与只用市场信息的博弈策略 | [正文](2026-11-18/00-first-price-market-competition.md)（37 个因子 + 28 个新因子、56 篇文献、三轴分类、40 张方法卡、15 个实验）· [解析脚本](2026-11-18/assets/shade_math.py) · [仿真](2026-11-18/assets/sim_market.py)（三组实验，仅标准库） |
 
 ## 同步方式
 
